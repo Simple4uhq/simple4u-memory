@@ -5,7 +5,7 @@ description = "Persistent memory for Claude — MCP server with hierarchical mem
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Simple4u", email = "hello@simple4uhq.com" }]
+authors = [{ name = "Simple4u", email = "nests@simple4uhq.com" }]
 keywords = ["claude", "mcp", "ai", "memory", "persistent", "anthropic"]
 dependencies = [
     "mcp>=1.0.0",
