@@ -22,7 +22,7 @@ pip install simple4u-memory
 Or from source:
 
 ```bash
-git clone https://github.com/simple4u/simple4u-memory
+git clone https://github.com/Simple4uhq/simple4u-memory
 cd simple4u-memory
 pip install -e .
 ```

@@ -16,9 +16,9 @@ dependencies = [
 simple4u-memory = "simple4u_memory.server:main"
 
 [project.urls]
-Homepage = "https://github.com/simple4u/simple4u-memory"
-Repository = "https://github.com/simple4u/simple4u-memory"
-Issues = "https://github.com/simple4u/simple4u-memory/issues"
+Homepage = "https://github.com/Simple4uhq/simple4u-memory"
+Repository = "https://github.com/Simple4uhq/simple4u-memory"
+Issues = "https://github.com/Simple4uhq/simple4u-memory/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
