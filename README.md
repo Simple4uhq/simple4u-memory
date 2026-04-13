@@ -27,38 +27,37 @@ cd simple4u-memory
 pip install -e .
 ```
 
-## Use with Claude Desktop
+## Setup — one command
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
-or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+After install, run:
 
-```json
-{
-  "mcpServers": {
-    "simple4u-memory": {
-      "command": "simple4u-memory"
-    }
-  }
-}
+```bash
+simple4u-memory init
 ```
 
-Restart Claude Desktop. The memory tools will appear in the MCP panel.
+This configures Claude Desktop and Claude Code automatically:
+- Adds the MCP server entry to both client configs (idempotent)
+- Writes a short guidance block to `~/.claude/CLAUDE.md` so Claude calls
+  `get_persona()` at session start and uses `remember()` proactively
 
-## Use with Claude Code
+Restart Claude Desktop / Claude Code and the memory tools are live.
 
-Add to `~/.claude/settings.json`:
+### Flags
 
-```json
-{
-  "mcpServers": {
-    "simple4u-memory": {
-      "command": "simple4u-memory"
-    }
-  }
-}
+```bash
+simple4u-memory init --desktop        # Claude Desktop only
+simple4u-memory init --code           # Claude Code only
+simple4u-memory init --no-claude-md   # skip CLAUDE.md guidance block
+simple4u-memory init --dry-run        # preview changes without applying
+simple4u-memory uninstall             # remove all config entries
 ```
 
-Or install as a project-scoped server by adding to `.mcp.json`:
+### Manual setup (alternative)
+
+If you prefer editing configs by hand, add this to
+`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS),
+`%APPDATA%\Claude\claude_desktop_config.json` (Windows),
+or `~/.claude/settings.json` (Claude Code):
 
 ```json
 {
@@ -105,10 +104,18 @@ facts the AI will know on every session.
 
 - `SIMPLE4U_MEMORY_HOME` — override the data directory (default `~/.simple4u-memory`)
 
+## Uninstall
+
+```bash
+simple4u-memory uninstall   # remove configs from Claude Desktop + Code
+pip uninstall simple4u-memory
+rm -rf ~/.simple4u-memory   # optional — also delete stored memories
+```
+
 ## Status
 
-v0.1 — early release. Core memory tools work. Future: semantic embeddings,
-memory hierarchies with decay, team-shared memories.
+v0.1.1 — early release. Core memory tools + setup command work. Future: semantic
+embeddings, memory hierarchies with decay, team-shared memories.
 
 ## Part of the Simple4u ecosystem
 

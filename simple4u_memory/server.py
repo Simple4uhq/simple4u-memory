@@ -20,14 +20,27 @@ def get_home() -> Path:
     return Path.home() / ".simple4u-memory"
 
 
-# Initialize shared state
-HOME = get_home()
-PERSONA = PersonaLoader(HOME)
-PERSONA.ensure_initialized()
-STORE = MemoryStore(HOME)
-
-# Create MCP server
+# MCP server and shared state are initialized lazily so CLI subcommands
+# (init, uninstall) don't touch the filesystem or import heavy resources.
 mcp = FastMCP("simple4u-memory")
+_STORE: MemoryStore | None = None
+_PERSONA: PersonaLoader | None = None
+
+
+def _store() -> MemoryStore:
+    global _STORE
+    if _STORE is None:
+        _STORE = MemoryStore(get_home())
+    return _STORE
+
+
+def _persona() -> PersonaLoader:
+    global _PERSONA
+    if _PERSONA is None:
+        home = get_home()
+        _PERSONA = PersonaLoader(home)
+        _PERSONA.ensure_initialized()
+    return _PERSONA
 
 
 @mcp.tool()
@@ -42,7 +55,7 @@ def remember(text: str, category: str = "general") -> str:
         category: Optional category — "user", "project", "preference",
                   "reference", "general". Defaults to "general".
     """
-    memory_id = STORE.remember(text, category=category)
+    memory_id = _store().remember(text, category=category)
     return f"Remembered (id={memory_id}, category={category}): {text}"
 
 
@@ -59,7 +72,7 @@ def recall(query: str, limit: int = 5, category: str | None = None) -> str:
         limit: Max results to return (default 5).
         category: Optional filter by category.
     """
-    memories = STORE.recall(query, limit=limit, category=category)
+    memories = _store().recall(query, limit=limit, category=category)
     if not memories:
         return f"No memories found for '{query}'."
     lines = [f"Found {len(memories)} memories for '{query}':"]
@@ -77,7 +90,7 @@ def list_memories(category: str | None = None, limit: int = 20) -> str:
         category: Filter by category (user/project/preference/reference/general).
         limit: Max results to return.
     """
-    memories = STORE.list_all(category=category, limit=limit)
+    memories = _store().list_all(category=category, limit=limit)
     if not memories:
         filt = f" in category '{category}'" if category else ""
         return f"No memories stored{filt} yet."
@@ -97,7 +110,7 @@ def forget(memory_id: int) -> str:
     Args:
         memory_id: The id of the memory to remove.
     """
-    deleted = STORE.forget(memory_id)
+    deleted = _store().forget(memory_id)
     if deleted:
         return f"Forgot memory {memory_id}."
     return f"No memory found with id {memory_id}."
@@ -114,7 +127,7 @@ def journal(text: str) -> str:
     Args:
         text: The journal entry text.
     """
-    journal_id = STORE.journal(text)
+    journal_id = _store().journal(text)
     return f"Journal entry saved (id={journal_id})."
 
 
@@ -125,7 +138,7 @@ def get_persona() -> str:
     This gives the AI its identity and what it knows about the user. Call this
     at session start to load full context.
     """
-    return PERSONA.get_system_prompt()
+    return _persona().get_system_prompt()
 
 
 @mcp.tool()
@@ -135,7 +148,7 @@ def recent_journals(days: int = 7) -> str:
     Args:
         days: Number of days back to search (default 7).
     """
-    entries = STORE.recent_journals(days=days)
+    entries = _store().recent_journals(days=days)
     if not entries:
         return f"No journal entries in the last {days} days."
     lines = [f"{len(entries)} journal entries from last {days} days:"]
@@ -145,7 +158,14 @@ def recent_journals(days: int = 7) -> str:
 
 
 def main() -> None:
-    """Entry point for the simple4u-memory command."""
+    """Entry point. Routes to CLI subcommands or MCP server."""
+    argv = sys.argv[1:]
+    if argv and argv[0] in {"init", "uninstall", "--help", "-h"}:
+        from simple4u_memory.init import run_cli
+        sys.exit(run_cli(argv))
+
+    # Default: run MCP server over stdio
+    _persona()  # ensure data dir exists before server starts
     mcp.run()
 
 
