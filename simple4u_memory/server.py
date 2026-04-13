@@ -14,7 +14,7 @@ from simple4u_memory.persona import PersonaLoader
 
 def get_home() -> Path:
     """Resolve data directory. Override with SIMPLE4U_MEMORY_HOME env var."""
-    env_home = os.environ.get("SIMPLE4U_MEMORY_HOME") or os.environ.get("CLAUDIA_HOME")
+    env_home = os.environ.get("SIMPLE4U_MEMORY_HOME")
     if env_home:
         return Path(env_home).expanduser()
     return Path.home() / ".simple4u-memory"
