@@ -1,0 +1,29 @@
+[project]
+name = "simple4u-memory"
+version = "0.1.0"
+description = "Persistent memory for Claude — MCP server with hierarchical memory, semantic search, and customizable persona"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Simple4u", email = "hello@simple4uhq.com" }]
+keywords = ["claude", "mcp", "ai", "memory", "persistent", "anthropic"]
+dependencies = [
+    "mcp>=1.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+simple4u-memory = "simple4u_memory.server:main"
+
+[project.urls]
+Homepage = "https://github.com/simple4u/simple4u-memory"
+Repository = "https://github.com/simple4u/simple4u-memory"
+Issues = "https://github.com/simple4u/simple4u-memory/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["simple4u_memory*"]
