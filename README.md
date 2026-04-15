@@ -5,11 +5,11 @@
 Claude forgets you every time you close the chat. Simple4u Memory fixes that.
 
 - **Hierarchical memory** — facts with categories (user, project, preference, reference, general)
-- **Full-text search** — SQLite FTS5 across everything remembered
+- **Two-corpus recall** — searches both SQLite facts AND your markdown memory files (Claude Code auto-memory, feedback rules, project notes, daily tick logs) in one `recall(query)` call
 - **Session journals** — end-of-conversation notes you can read like a diary
 - **Customizable persona** — edit `~/.simple4u-memory/persona.md` to shape behavior
 - **Portable** — works in Claude Desktop, Claude Code, or any MCP client
-- **Local-first** — your memory lives in `~/.simple4u-memory/` on your machine
+- **Local-first** — your memory lives in `~/.simple4u-memory/` on your machine, nothing leaves
 
 Free and open source. MIT license.
 
@@ -74,7 +74,7 @@ or `~/.claude/settings.json` (Claude Code):
 | Tool | Purpose |
 |------|---------|
 | `remember(text, category)` | Save a fact to long-term memory |
-| `recall(query, limit)` | Search memories via full-text search |
+| `recall(query, limit, sources)` | Search memories across SQLite facts + markdown roots (Claude Code auto-memory + persona home). `sources` = `all` / `sqlite` / `markdown` |
 | `list_memories(category)` | Browse what's remembered |
 | `forget(memory_id)` | Delete a wrong/outdated memory |
 | `journal(text)` | Write an end-of-session note |
@@ -103,6 +103,7 @@ facts the AI will know on every session.
 ## Environment
 
 - `SIMPLE4U_MEMORY_HOME` — override the data directory (default `~/.simple4u-memory`)
+- `SIMPLE4U_MARKDOWN_ROOTS` — colon-separated list of additional markdown roots `recall()` should search. Defaults to Claude Code auto-memory dir (`~/.claude/projects/<slug>/memory`) + `SIMPLE4U_MEMORY_HOME`.
 
 ## Uninstall
 
@@ -114,14 +115,13 @@ rm -rf ~/.simple4u-memory   # optional — also delete stored memories
 
 ## Status
 
-v0.1.1 — early release. Core memory tools + setup command work. Future: semantic
-embeddings, memory hierarchies with decay, team-shared memories.
+v0.1.2 — two-corpus `recall()` lands (SQLite + markdown). Core memory tools +
+setup command stable. Future: adaptive persona, semantic embeddings, team-shared
+memories.
 
-## Part of the Simple4u ecosystem
+## Built by Simple4u
 
-This is free and open source. If you want a full AI employee with this memory
-built in — Gmail, Drive, reminders, daily intelligence, city/industry awareness —
-check out [Simple4u](https://simple4uhq.com). $247/mo, 2 months free.
+We make AI employees. [simple4uhq.com](https://simple4uhq.com)
 
 ## License
 

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
+from simple4u_memory.markdown_memory import MarkdownMemoryStore
 from simple4u_memory.memory import MemoryStore
 from simple4u_memory.persona import PersonaLoader
 
@@ -25,6 +26,7 @@ def get_home() -> Path:
 mcp = FastMCP("simple4u-memory")
 _STORE: MemoryStore | None = None
 _PERSONA: PersonaLoader | None = None
+_MARKDOWN: MarkdownMemoryStore | None = None
 
 
 def _store() -> MemoryStore:
@@ -41,6 +43,13 @@ def _persona() -> PersonaLoader:
         _PERSONA = PersonaLoader(home)
         _PERSONA.ensure_initialized()
     return _PERSONA
+
+
+def _markdown() -> MarkdownMemoryStore:
+    global _MARKDOWN
+    if _MARKDOWN is None:
+        _MARKDOWN = MarkdownMemoryStore()
+    return _MARKDOWN
 
 
 @mcp.tool()
@@ -60,26 +69,64 @@ def remember(text: str, category: str = "general") -> str:
 
 
 @mcp.tool()
-def recall(query: str, limit: int = 5, category: str | None = None) -> str:
+def recall(
+    query: str,
+    limit: int = 5,
+    category: str | None = None,
+    sources: str = "all",
+) -> str:
     """Search persistent memory for relevant facts.
 
-    Uses full-text search across all stored memories. Use this when the user
-    references past conversations, asks what you remember, or you need context
-    from prior sessions.
+    Scans TWO corpora by default and merges results:
+      1. SQLite memories (written via `remember` tool)
+      2. Markdown memory files — Claude Code auto-memory + simple4u-memory home
+         (configurable via SIMPLE4U_MARKDOWN_ROOTS env, colon-separated paths)
+
+    Use this at the start of any substantive conversation to pull in prior
+    context, feedback rules, project state, and recent session observations.
 
     Args:
-        query: Search terms. Empty string returns most recent memories.
-        limit: Max results to return (default 5).
-        category: Optional filter by category.
+        query: Search terms. Empty string returns most recent entries.
+        limit: Max results per source (default 5).
+        category: Optional filter (SQLite only).
+        sources: "all" (default), "sqlite", or "markdown".
     """
-    memories = _store().recall(query, limit=limit, category=category)
-    if not memories:
+    want_sqlite = sources in {"all", "sqlite"}
+    want_markdown = sources in {"all", "markdown"}
+
+    lines: list[str] = []
+
+    if want_markdown:
+        hits = _markdown().search(query, limit=limit)
+        if hits:
+            lines.append(f"=== Markdown memory ({len(hits)} results) ===")
+            for h in hits:
+                tag = f"[{h.kind}]" if h.kind != "permanent" else "[file]"
+                rel = str(h.path)
+                try:
+                    rel = str(h.path.relative_to(Path.home()))
+                    rel = "~/" + rel
+                except ValueError:
+                    pass
+                matched = (
+                    f" match={','.join(h.matched_terms)}" if h.matched_terms else ""
+                )
+                lines.append(f"{tag} {rel} score={h.score:.1f}{matched}")
+                if h.snippet:
+                    lines.append(f"  {h.snippet}")
+                lines.append("")
+
+    if want_sqlite:
+        memories = _store().recall(query, limit=limit, category=category)
+        if memories:
+            lines.append(f"=== SQLite memory ({len(memories)} results) ===")
+            for m in memories:
+                date = m.created_at[:10]
+                lines.append(f"[sqlite#{m.id}] ({m.category}, {date}) {m.text}")
+
+    if not lines:
         return f"No memories found for '{query}'."
-    lines = [f"Found {len(memories)} memories for '{query}':"]
-    for m in memories:
-        date = m.created_at[:10]
-        lines.append(f"  [{m.id}] ({m.category}, {date}) {m.text}")
-    return "\n".join(lines)
+    return "\n".join(lines).rstrip()
 
 
 @mcp.tool()

@@ -16,17 +16,23 @@ CLAUDE_MD_BLOCK = f"""
 {MARKER_START}
 ## simple4u-memory
 
-You have access to persistent memory across sessions via MCP tools. Use them actively.
+Persistent memory across sessions via MCP tools. Use them actively, not only when asked.
 
-- `get_persona()` — call at session start to load identity and user context
+- `get_persona()` — call at session start to load identity + user context
+- `recall(query, limit)` — semantic-ish search across BOTH corpora:
+    1. SQLite facts saved via `remember`
+    2. Markdown files in Claude Code auto-memory dir + simple4u-memory home
+       (~/.claude/projects/<slug>/memory/*.md, tick logs, permanent feedback/project files)
+  Call this at the start of any substantive request — before answering, pull the
+  relevant prior context (feedback rules, project state, recent ticks).
 - `remember(text, category)` — save facts about user, projects, preferences
-- `recall(query)` — search past memories when user references history
-- `journal(text)` — end-of-session notes after significant work
-- `list_memories(category)` — browse what you remember
-- `forget(memory_id)` — remove wrong/outdated memories
+- `journal(text)` — end-of-session recap after significant work
+- `list_memories(category)` — browse SQLite-stored memories
+- `forget(memory_id)` — remove wrong/outdated SQLite memories
 
-At the start of every session, call `get_persona()` to load context.
-When you learn something worth remembering about the user, `remember()` it immediately.
+At session start: `get_persona()`.
+Before answering a non-trivial request: `recall(topic)` first, then respond.
+Whenever something surprising or non-obvious comes up: `remember()` it immediately.
 {MARKER_END}
 """
 
