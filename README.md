@@ -115,9 +115,10 @@ rm -rf ~/.simple4u-memory   # optional — also delete stored memories
 
 ## Status
 
-v0.1.2 — two-corpus `recall()` lands (SQLite + markdown). Core memory tools +
-setup command stable. Future: adaptive persona, semantic embeddings, team-shared
-memories.
+v0.1.3 — default persona rewritten as working rules (no character, no name).
+Ships discipline, not personality: no-hardcode, verify-before-citing, no-silent-
+rewrites, post-write review pass. v0.1.2 added two-corpus `recall()` (SQLite +
+markdown). Future: adaptive persona, semantic embeddings, team-shared memories.
 
 ## Built by Simple4u
 
