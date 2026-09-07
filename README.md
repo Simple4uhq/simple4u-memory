@@ -9,7 +9,7 @@ how persistent memory should be organized — not just storage, but
 classification, periodic review, persona, cleanup, and session
 continuity.
 
-Part of the [SAE4U](https://github.com/Simple4uhq) OSS family
+Built by [Simple4u](https://simple4u.io), an engineering firm in New York. Part of the [SAE4U](https://github.com/Simple4uhq) OSS family
 alongside [`sae4u-agent`](https://github.com/Simple4uhq/sae4u-agent).
 
 ---
